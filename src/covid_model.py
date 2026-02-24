@@ -12,14 +12,22 @@ df = pd.read_excel("../data/MD_COVID_19_dataset.xlsx")
 # Clean data
 df = df.dropna()
 
-# Normalize numeric columns
-num_cols = df.select_dtypes(include=['int64', 'float64']).columns
+# Identify identifier and feature columns
+id_cols = ["OBJECTID"]
+
+# Select numeric feature columns excluding identifiers
+num_cols = [
+    c for c in df.select_dtypes(include=["int64", "float64"]).columns
+    if c not in id_cols
+]
+
+# Normalize only meaningful numeric features
 scaler = MinMaxScaler()
 df[num_cols] = scaler.fit_transform(df[num_cols])
 
 # Apply clustering
 kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
-df['cluster'] = kmeans.fit_predict(df[num_cols])
+df["cluster"] = kmeans.fit_predict(df[num_cols])
 
 # Train Random Forest model
 X = df[num_cols]
